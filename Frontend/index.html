@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RailScope — Train Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">⬡</span>
+        <span class="brand-name">RailScope</span>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" data-tab="all-trains">All Trains</button>
+        <button class="nav-btn" data-tab="search">Search Route</button>
+      </nav>
+    </div>
+    <!-- Animated track line -->
+    <div class="track-line">
+      <div class="train-cursor"></div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- ── Tab: All Trains ─────────────────────────── -->
+    <section class="tab-panel active" id="tab-all-trains">
+      <div class="panel-header">
+        <h1 class="panel-title">Active Fleet</h1>
+        <p class="panel-subtitle">Live data from the network</p>
+        <button class="btn-refresh" id="btn-refresh-all">
+          <span class="refresh-icon">↻</span> Refresh
+        </button>
+      </div>
+
+      <div class="status-bar" id="all-status"></div>
+      <div class="loader" id="all-loader">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+        <p>Fetching train data…</p>
+      </div>
+
+      <div class="trains-grid" id="trains-grid"></div>
+    </section>
+
+    <!-- ── Tab: Search ─────────────────────────────── -->
+    <section class="tab-panel" id="tab-search">
+      <div class="panel-header">
+        <h1 class="panel-title">Find a Route</h1>
+        <p class="panel-subtitle">Search by station codes</p>
+      </div>
+
+      <div class="search-card">
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="code">By Station Code</button>
+          <button class="mode-btn" data-mode="name">By Station Name</button>
+        </div>
+
+        <!-- By Code inputs -->
+        <div class="search-row" id="row-code">
+          <div class="input-group">
+            <label class="input-label" for="src-code">Origin Code</label>
+            <div class="input-wrap">
+              <span class="input-icon">◉</span>
+              <input
+                class="code-input"
+                id="src-code"
+                type="text"
+                placeholder="e.g. NDLS"
+                maxlength="8"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="swap-btn-wrap">
+            <button class="swap-btn" id="btn-swap-code" title="Swap stations">⇄</button>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="dst-code">Destination Code</label>
+            <div class="input-wrap">
+              <span class="input-icon">◎</span>
+              <input
+                class="code-input"
+                id="dst-code"
+                type="text"
+                placeholder="e.g. CST"
+                maxlength="8"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- By Name inputs -->
+        <div class="search-row hidden" id="row-name">
+          <div class="input-group">
+            <label class="input-label" for="src-name">Origin Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">◉</span>
+              <input
+                class="name-input"
+                id="src-name"
+                type="text"
+                placeholder="e.g. Delhi"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="swap-btn-wrap">
+            <button class="swap-btn" id="btn-swap-name" title="Swap stations">⇄</button>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="dst-name">Destination Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">◎</span>
+              <input
+                class="name-input"
+                id="dst-name"
+                type="text"
+                placeholder="e.g. Mumbai"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-search" id="btn-search">
+          Search Trains
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+
+      <div class="status-bar" id="search-status"></div>
+      <div class="loader hidden" id="search-loader">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+        <p>Searching routes…</p>
+      </div>
+
+      <div class="results-wrap" id="search-results"></div>
+    </section>
+
+  </main>
+
+  <!-- Train Card Template -->
+  <template id="tmpl-train-card">
+    <article class="train-card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <div class="train-meta">
+            <span class="train-number mono"></span>
+            <h2 class="train-name"></h2>
+          </div>
+          <span class="schedule-badge"></span>
+        </div>
+        <div class="schedule-list"></div>
+      </div>
+    </article>
+  </template>
+
+  <!-- Schedule Item Template -->
+  <template id="tmpl-schedule">
+    <div class="schedule-item">
+      <div class="route-row">
+        <div class="station src-station">
+          <span class="station-code mono"></span>
+          <span class="station-name"></span>
+        </div>
+        <div class="route-line">
+          <span class="depart-time mono"></span>
+          <div class="line-track">
+            <div class="line-dot start"></div>
+            <div class="line-body"></div>
+            <div class="line-dot end"></div>
+          </div>
+          <span class="arrive-time mono"></span>
+        </div>
+        <div class="station dst-station">
+          <span class="station-code mono"></span>
+          <span class="station-name"></span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Search Result Template -->
+  <template id="tmpl-search-result">
+    <article class="result-card">
+      <div class="result-train-info">
+        <span class="train-number mono"></span>
+        <h2 class="train-name"></h2>
+      </div>
+      <div class="result-route">
+        <div class="result-station origin">
+          <div class="result-time mono"></div>
+          <div class="result-code mono"></div>
+          <div class="result-sname"></div>
+        </div>
+        <div class="result-track">
+          <div class="rt-dot"></div>
+          <div class="rt-line"></div>
+          <div class="rt-dot"></div>
+        </div>
+        <div class="result-station dest">
+          <div class="result-time mono"></div>
+          <div class="result-code mono"></div>
+          <div class="result-sname"></div>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
