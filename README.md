@@ -69,7 +69,7 @@ GET /trains
 Example:
 
 ```http
-http://localhost:8086/trains
+http://localhost:8000/trains
 ```
 
 ---
@@ -92,7 +92,7 @@ Parameters:
 Example:
 
 ```http
-http://localhost:8086/search/by-code?sourceCode=NDLS&destinationCode=CST
+http://localhost:8000/search/by-code?sourceCode=NDLS&destinationCode=CST
 ```
 
 ---
@@ -115,7 +115,7 @@ Parameters:
 Example:
 
 ```http
-http://localhost:8086/search/by-name?sourceName=New Delhi&destinationName=Mumbai 
+http://localhost:8000/search/by-name?sourceName=New Delhi&destinationName=Mumbai 
 ```
 
 ---
@@ -131,7 +131,7 @@ GET /test
 Example:
 
 ```http
-http://localhost:8086/test
+http://localhost:8000/test
 ```
 
 Run this endpoint once after creating the database.
@@ -197,7 +197,7 @@ http://localhost:8086
 Open:
 
 ```http
-http://localhost:8086/test
+http://localhost:8000/test
 ```
 
 This inserts predefined train and station data into the database.
